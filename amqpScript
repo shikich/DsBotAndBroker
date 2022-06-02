@@ -1,0 +1,49 @@
+-- Json format precode
+--select row_to_json(tempinfo) 
+--	FROM (select details,comment,sum 
+--		  from public.cabinet_orderinfo 
+--		  ORDER BY "id" DESC
+--		  LIMIT 1) 
+--		 tempinfo;
+
+CREATE OR REPLACE FUNCTION collect_message(someID integer)
+    RETURNS text AS $$
+  DECLARE
+  	 namegameline text := (SELECT A.short_name
+							FROM main_game A
+							INNER JOIN cabinet_orderinfo C ON C.game_id_id = A.id
+							WHERE C.order_id_id = someID
+							LIMIT 1);  
+	 fullnamegameline text := (SELECT A.name
+							FROM main_game A
+							INNER JOIN cabinet_orderinfo C ON C.game_id_id = A.id
+							WHERE C.order_id_id = someID
+							LIMIT 1); 
+	 gameimageurl text := (SELECT A.image
+							FROM main_game A
+							INNER JOIN cabinet_orderinfo C ON C.game_id_id = A.id
+							WHERE C.order_id_id = someID
+							LIMIT 1); 
+     detailline text := (SELECT T.details
+						 from public.cabinet_orderinfo T
+						 WHERE T.order_id_id = someID);
+	 commentline text := (SELECT T.comment
+						 from public.cabinet_orderinfo T
+						 WHERE order_id_id = someID);
+	 sumline numeric(6,2) := (SELECT t.sum
+						 from public.cabinet_orderinfo T
+						 WHERE order_id_id = someID);
+  BEGIN REtURN
+		concat(namegameline,'<split>',
+			   fullnamegameline, '<split>', 
+			   detailline,'<split>Comment: ', 
+			   commentline,'<split>', 
+			   sumline,'<split>', 
+			   gameimageurl);
+  END;
+$$ LANGUAGE 'plpgsql' VOLATILE;
+
+select collect_message(1); --type id to check ouput
+
+SELECT amqp.publish(1, '', 'first_queue', collect_message(1)); -- send message to rabbitmq queue
+
