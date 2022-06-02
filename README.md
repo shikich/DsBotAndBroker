@@ -113,7 +113,6 @@ http://localhost:15672/#/queues
 prefix for bot - '?'
 
 Commands list:
-- ?sub
 - ?ping
 - ?help / ?help <command> (ex: ?help ping)
 
