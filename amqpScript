@@ -1,11 +1,3 @@
--- Json format precode
---select row_to_json(tempinfo) 
---	FROM (select details,comment,sum 
---		  from public.cabinet_orderinfo 
---		  ORDER BY "id" DESC
---		  LIMIT 1) 
---		 tempinfo;
-
 CREATE OR REPLACE FUNCTION collect_message(someID integer)
     RETURNS text AS $$
   DECLARE
